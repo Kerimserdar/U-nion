@@ -1,6 +1,6 @@
 {
-    "name": "empty",
-    "short_name": "empty",
+    "name": "union",
+    "short_name": "union",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
