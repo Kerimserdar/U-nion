@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:union/login.dart';
+import 'package:union/mysql.dart';
 
 class Signup extends StatefulWidget {
   @override
@@ -7,6 +8,43 @@ class Signup extends StatefulWidget {
 }
 
 class _SignupState extends State<Signup> {
+  TextEditingController name = TextEditingController();
+  TextEditingController mail = TextEditingController();
+  TextEditingController password = TextEditingController();
+  TextEditingController gender = TextEditingController();
+  TextEditingController age = TextEditingController();
+
+  var db = Mysql();
+
+  Future<void> addUser(String name, String mail, String password, String gender,
+      String age) async {
+    db.getConnection().then((conn) => {
+          conn
+              .query(
+                  "INSERT INTO `user` (`mail`, `name`, `password`, `age`, `gender`) VALUES ('$mail', '$name', '$password', $age, '$gender')")
+              .then((results) => {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text("Notice"),
+                          content: Text(
+                              "You signed up to U-nion\nNow you can login"),
+                          actions: [
+                            TextButton(
+                              child: Text("Okay"),
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  }),
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -59,6 +97,7 @@ class _SignupState extends State<Signup> {
                           right: MediaQuery.of(context).size.width * 0.1),
                       width: MediaQuery.of(context).size.width * 0.5,
                       child: TextField(
+                        controller: name,
                         style: TextStyle(
                           color: Colors.white,
                         ),
@@ -78,6 +117,7 @@ class _SignupState extends State<Signup> {
                           right: MediaQuery.of(context).size.width * 0.1),
                       width: MediaQuery.of(context).size.width * 0.5,
                       child: TextField(
+                        controller: mail,
                         style: TextStyle(
                           color: Colors.white,
                         ),
@@ -97,6 +137,7 @@ class _SignupState extends State<Signup> {
                           right: MediaQuery.of(context).size.width * 0.1),
                       width: MediaQuery.of(context).size.width * 0.5,
                       child: TextField(
+                        controller: password,
                         style: TextStyle(
                           color: Colors.white,
                         ),
@@ -116,6 +157,7 @@ class _SignupState extends State<Signup> {
                           right: MediaQuery.of(context).size.width * 0.1),
                       width: MediaQuery.of(context).size.width * 0.5,
                       child: TextField(
+                        controller: gender,
                         style: TextStyle(
                           color: Colors.white,
                         ),
@@ -136,6 +178,7 @@ class _SignupState extends State<Signup> {
                           right: MediaQuery.of(context).size.width * 0.1),
                       width: MediaQuery.of(context).size.width * 0.5,
                       child: TextField(
+                        controller: age,
                         style: TextStyle(
                           color: Colors.white,
                         ),
@@ -158,24 +201,8 @@ class _SignupState extends State<Signup> {
                 SizedBox(width: MediaQuery.of(context).size.width * 0.6),
                 ElevatedButton(
                   onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: Text("Notice"),
-                          content: Text(
-                              "You signed up to U-nion\nNow you can login"),
-                          actions: [
-                            TextButton(
-                              child: Text("Okay"),
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                            ),
-                          ],
-                        );
-                      },
-                    );
+                    addUser(name.text, mail.text, password.text, gender.text,
+                        age.text);
                   },
                   child: Row(
                     children: [

@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 import 'package:flutter/material.dart';
 import 'package:union/mysql.dart';
 import 'package:union/pages.dart';
@@ -13,28 +11,54 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-  
-  var db = Mysql();
-  var val = "";
+  TextEditingController mail = TextEditingController();
+  TextEditingController password = TextEditingController();
 
-  void getVal() {
-    String sql = "select name from smalluniversity.instructor";
+  var db = Mysql();
+
+  Future<void> checkUser(String mail, String password) async {
     db.getConnection().then((conn) => {
-          conn.query(sql).then((results) => {
-                for (var row in results)
-                  {
-                    setState(() {
-                      val = row[0];
-                    }),
-                  }
-              }),
+          conn
+              .query(
+                  "select password from union.user where mail = '$mail'")
+              .then((results) => {
+                    for (var row in results)
+                      {
+                        if (row[0].toString() == password.toString())
+                          {
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => Pages())),
+                          }
+                        else
+                          {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: Text("Warning"),
+                                  content: Text("Mail or password is wrong"),
+                                  actions: [
+                                    TextButton(
+                                      child: Text("Okay"),
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
+                          }
+                      }
+                  }),
         });
   }
 
   @override
   void initState() {
     super.initState();
-    getVal();
   }
 
   @override
@@ -59,7 +83,7 @@ class _LoginState extends State<Login> {
                   padding: EdgeInsets.only(
                       top: MediaQuery.of(context).size.height * 0.1),
                   child: Text(
-                    "Welcome -$val- to",
+                    "Welcome to",
                     style: TextStyle(
                       color: Colors.white,
                     ),
@@ -110,13 +134,14 @@ class _LoginState extends State<Login> {
                           right: MediaQuery.of(context).size.width * 0.1),
                       width: MediaQuery.of(context).size.width * 0.5,
                       child: TextField(
+                        controller: mail,
                         style: TextStyle(
                           color: Colors.white,
                         ),
                         decoration: InputDecoration(
                           border: InputBorder.none,
                           fillColor: Colors.lightBlueAccent,
-                          labelText: 'Name',
+                          labelText: 'Email',
                           labelStyle: TextStyle(
                             color: Colors.white70,
                           ),
@@ -130,9 +155,11 @@ class _LoginState extends State<Login> {
                           right: MediaQuery.of(context).size.width * 0.1),
                       width: MediaQuery.of(context).size.width * 0.5,
                       child: TextField(
+                        controller: password,
                         style: TextStyle(
                           color: Colors.white,
                         ),
+                        obscureText: true,
                         decoration: InputDecoration(
                           border: InputBorder.none,
                           fillColor: Colors.lightBlueAccent,
@@ -152,8 +179,7 @@ class _LoginState extends State<Login> {
                 SizedBox(width: MediaQuery.of(context).size.width * 0.6),
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.pushReplacement(context,
-                        MaterialPageRoute(builder: (context) => Pages()));
+                    checkUser(mail.text, password.text);
                   },
                   child: Row(
                     children: [
