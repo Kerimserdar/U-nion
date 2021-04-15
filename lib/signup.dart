@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:union/login.dart';
-import 'package:union/mysql.dart';
+import 'package:http/http.dart' as http;
 
 class Signup extends StatefulWidget {
   @override
@@ -8,41 +8,61 @@ class Signup extends StatefulWidget {
 }
 
 class _SignupState extends State<Signup> {
-  TextEditingController name = TextEditingController();
-  TextEditingController mail = TextEditingController();
-  TextEditingController password = TextEditingController();
-  TextEditingController gender = TextEditingController();
-  TextEditingController age = TextEditingController();
+  TextEditingController name = new TextEditingController();
+  TextEditingController mail = new TextEditingController();
+  TextEditingController password = new TextEditingController();
+  TextEditingController gender = new TextEditingController();
+  TextEditingController age = new TextEditingController();
 
-  var db = Mysql();
+  Future addUser() async {
+    var url = Uri.parse("https://aneroid-skies.000webhostapp.com/adduser.php");
+    var response = await http.post(url, body: {
+      "name": name.text,
+      "mail": mail.text,
+      "password": password.text,
+      "gender": gender.text,
+      "age": age.text,
+    });
 
-  Future<void> addUser(String name, String mail, String password, String gender,
-      String age) async {
-    db.getConnection().then((conn) => {
-          conn
-              .query(
-                  "INSERT INTO `user` (`mail`, `name`, `password`, `age`, `gender`) VALUES ('$mail', '$name', '$password', $age, '$gender')")
-              .then((results) => {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: Text("Notice"),
-                          content: Text(
-                              "You signed up to U-nion\nNow you can login"),
-                          actions: [
-                            TextButton(
-                              child: Text("Okay"),
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                  }),
-        });
+    var check = response.body;
+
+    if (check == "user added successfully") {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Notice"),
+            content: Text("You signed up to U-nion\nNow you can login"),
+            actions: [
+              TextButton(
+                child: Text("Okay"),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Notice"),
+            content: Text("You could not sign up"),
+            actions: [
+              TextButton(
+                child: Text("Okay"),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
   }
 
   @override
@@ -201,8 +221,7 @@ class _SignupState extends State<Signup> {
                 SizedBox(width: MediaQuery.of(context).size.width * 0.6),
                 ElevatedButton(
                   onPressed: () {
-                    addUser(name.text, mail.text, password.text, gender.text,
-                        age.text);
+                    addUser();
                   },
                   child: Row(
                     children: [

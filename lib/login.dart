@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:union/mysql.dart';
 import 'package:union/pages.dart';
 import 'package:union/signup.dart';
+import 'package:http/http.dart' as http;
 
 class Login extends StatefulWidget {
   Login({Key key}) : super(key: key);
@@ -14,46 +14,44 @@ class _LoginState extends State<Login> {
   TextEditingController mail = TextEditingController();
   TextEditingController password = TextEditingController();
 
-  var db = Mysql();
+  // Future<List> getData() async {
+  //   var url = Uri.https('aneroid-skies.000webhostapp.com', '/get.php');
+  //   var response = await http.get(url);
+  //   List data = jsonDecode(response.body);
+  //   print(data[0]["name"]);
+  //   print(data.toString());
+  // }
 
-  Future<void> checkUser(String mail, String password) async {
-    db.getConnection().then((conn) => {
-          conn
-              .query(
-                  "select password from union.user where mail = '$mail'")
-              .then((results) => {
-                    for (var row in results)
-                      {
-                        if (row[0].toString() == password.toString())
-                          {
-                            Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => Pages())),
-                          }
-                        else
-                          {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: Text("Warning"),
-                                  content: Text("Mail or password is wrong"),
-                                  actions: [
-                                    TextButton(
-                                      child: Text("Okay"),
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                      },
-                                    ),
-                                  ],
-                                );
-                              },
-                            ),
-                          }
-                      }
-                  }),
-        });
+  Future checkUser() async {
+    var url =
+        Uri.parse("https://aneroid-skies.000webhostapp.com/checkuser.php");
+    var response = await http.post(url, body: {
+      "mail": mail.text,
+      "password": password.text,
+    });
+
+    if (response.body == "true") {
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (context) => Pages()));
+    } else {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Warning"),
+            content: Text("Mail or password is wrong"),
+            actions: [
+              TextButton(
+                child: Text("Okay"),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
   }
 
   @override
@@ -179,7 +177,8 @@ class _LoginState extends State<Login> {
                 SizedBox(width: MediaQuery.of(context).size.width * 0.6),
                 ElevatedButton(
                   onPressed: () {
-                    checkUser(mail.text, password.text);
+                    //checkUser(mail.text, password.text);
+                    checkUser();
                   },
                   child: Row(
                     children: [
