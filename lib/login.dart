@@ -21,10 +21,10 @@ class _LoginState extends State<Login> {
   //   print(data[0]["name"]);
   //   print(data.toString());
   // }
-
+  
   Future checkUser() async {
     var url =
-        Uri.parse("https://aneroid-skies.000webhostapp.com/checkuser.php");
+        Uri.parse("http://kerimsungur.atwebpages.com/checkuser.php");
     var response = await http.post(url, body: {
       "mail": mail.text,
       "password": password.text,
