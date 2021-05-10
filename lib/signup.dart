@@ -15,7 +15,7 @@ class _SignupState extends State<Signup> {
   TextEditingController age = new TextEditingController();
 
   Future addUser() async {
-    var url = Uri.parse("https://aneroid-skies.000webhostapp.com/adduser.php");
+    var url = Uri.parse("http://kerimsungur.atwebpages.com/adduser.php");
     var response = await http.post(url, body: {
       "name": name.text,
       "mail": mail.text,
