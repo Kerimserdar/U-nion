@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:union/connect.dart';
 import 'package:union/pages.dart';
 import 'package:union/signup.dart';
 import 'package:http/http.dart' as http;
+
+int id;
+String name;
+String surname;
+String mail;
 
 class Login extends StatefulWidget {
   Login({Key key}) : super(key: key);
@@ -11,47 +17,81 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-  TextEditingController mail = TextEditingController();
-  TextEditingController password = TextEditingController();
+  TextEditingController m = TextEditingController();
+  TextEditingController p = TextEditingController();
 
-  // Future<List> getData() async {
-  //   var url = Uri.https('aneroid-skies.000webhostapp.com', '/get.php');
-  //   var response = await http.get(url);
-  //   List data = jsonDecode(response.body);
-  //   print(data[0]["name"]);
-  //   print(data.toString());
-  // }
-  
+  String sql = "";
+
   Future checkUser() async {
-    var url =
-        Uri.parse("http://kerimsungur.atwebpages.com/checkuser.php");
-    var response = await http.post(url, body: {
-      "mail": mail.text,
-      "password": password.text,
-    });
+    var db = new Mysql();
+    db.getConnection().then((conn) => {
+          sql =
+              'select * from user where mail = "${m.text}" and password = "${p.text}"',
+          conn.query(sql).then((results) => {
+                if (results != null)
+                  {
+                    for (var row in results)
+                      {
+                        id = row[0],
+                        name = row[1],
+                        surname = row[2],
+                        mail = row[3],
+                      },
+                    Navigator.pushReplacement(context,
+                        MaterialPageRoute(builder: (context) => Pages())),
+                  }
+                else
+                  {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text("Warning"),
+                          content: Text("Mail or password is wrong"),
+                          actions: [
+                            TextButton(
+                              child: Text("Okay"),
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  }
+              })
+        });
 
-    if (response.body == "true") {
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => Pages()));
-    } else {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text("Warning"),
-            content: Text("Mail or password is wrong"),
-            actions: [
-              TextButton(
-                child: Text("Okay"),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          );
-        },
-      );
-    }
+    // var url =
+    //     Uri.parse("http://kerimsungur.atwebpages.com/checkuser.php");
+    // var response = await http.post(url, body: {
+    //   "mail": mail.text,
+    //   "password": password.text,
+    // });
+
+    // if (response.body == "true") {
+    //     Navigator.pushReplacement(
+    //         context, MaterialPageRoute(builder: (context) => Pages()));
+    //   } else {
+    //     showDialog(
+    //       context: context,
+    //       builder: (BuildContext context) {
+    //         return AlertDialog(
+    //           title: Text("Warning"),
+    //           content: Text("Mail or password is wrong"),
+    //           actions: [
+    //             TextButton(
+    //               child: Text("Okay"),
+    //               onPressed: () {
+    //                 Navigator.pop(context);
+    //               },
+    //             ),
+    //           ],
+    //         );
+    //       },
+    //     );
+    //   }
   }
 
   @override
@@ -132,7 +172,7 @@ class _LoginState extends State<Login> {
                           right: MediaQuery.of(context).size.width * 0.1),
                       width: MediaQuery.of(context).size.width * 0.5,
                       child: TextField(
-                        controller: mail,
+                        controller: m,
                         style: TextStyle(
                           color: Colors.white,
                         ),
@@ -153,7 +193,7 @@ class _LoginState extends State<Login> {
                           right: MediaQuery.of(context).size.width * 0.1),
                       width: MediaQuery.of(context).size.width * 0.5,
                       child: TextField(
-                        controller: password,
+                        controller: p,
                         style: TextStyle(
                           color: Colors.white,
                         ),
@@ -177,7 +217,6 @@ class _LoginState extends State<Login> {
                 SizedBox(width: MediaQuery.of(context).size.width * 0.6),
                 ElevatedButton(
                   onPressed: () {
-                    //checkUser(mail.text, password.text);
                     checkUser();
                   },
                   child: Row(

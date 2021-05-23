@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'login.dart';
 
 class Pages extends StatefulWidget {
   @override
@@ -12,107 +13,164 @@ class _PagesState extends State<Pages> {
   TextEditingController word = new TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      appBar: AppBar(
-        title: Center(child: Text("Interest")),
-        backgroundColor: Colors.blue[900],
-      ),
       body: Container(
-          child: ListView(
-        padding: const EdgeInsets.all(8),
-        children: <Widget>[
-          ListTile(
-            title: Center(child: Text("What is your favorite film")),
-            subtitle: TextField(
-              controller: film,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Colors.pink[500], Colors.blue[900]]),
+          shape: BoxShape.rectangle,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Text(
+              "Let's get to know you better",
               style: TextStyle(
                 color: Colors.white,
-              ),
-              decoration: InputDecoration(
-                border: new OutlineInputBorder(
-                  borderRadius: const BorderRadius.all(
-                    const Radius.circular(10.0),
-                  ),
-                ),
-                fillColor: Colors.lightBlueAccent,
-                labelText: 'Film',
-                labelStyle: TextStyle(
-                  color: Colors.white70,
-                ),
+                fontSize: 30,
+                fontWeight: FontWeight.w300,
               ),
             ),
-          ),
-          SizedBox(
-            height: MediaQuery.of(context).size.height * 0.05,
-          ),
-          ListTile(
-            title: Center(child: Text("What is your favorite book")),
-            subtitle: TextField(
-              controller: book,
-              style: TextStyle(
-                color: Colors.white,
-              ),
-              decoration: InputDecoration(
-                border: new OutlineInputBorder(
-                  borderRadius: const BorderRadius.all(
-                    const Radius.circular(10.0),
+            Column(
+              children: [
+                Divider(
+                  thickness: 1,
+                  color: Colors.white,
+                ),
+                Container(
+                  height: MediaQuery.of(context).size.height * 0.5,
+                  child: ListView(
+                    padding: const EdgeInsets.all(8),
+                    children: <Widget>[
+                      ListTile(
+                        title: TextField(
+                          controller: film,
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                          decoration: InputDecoration(
+                            border: new OutlineInputBorder(
+                              borderSide: new BorderSide(color: Colors.white),
+                              borderRadius: const BorderRadius.all(
+                                const Radius.circular(10.0),
+                              ),
+                            ),
+                            fillColor: Colors.lightBlueAccent,
+                            labelText: 'What is your favorite film',
+                            labelStyle: TextStyle(
+                              color: Colors.white70,
+                            ),
+                          ),
+                        ),
+                      ),
+                      ListTile(
+                        title: TextField(
+                          controller: book,
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                          decoration: InputDecoration(
+                            border: new OutlineInputBorder(
+                              borderSide: new BorderSide(color: Colors.white),
+                              borderRadius: const BorderRadius.all(
+                                const Radius.circular(10.0),
+                              ),
+                            ),
+                            fillColor: Colors.lightBlueAccent,
+                            labelText: 'What is your favorite book',
+                            labelStyle: TextStyle(
+                              color: Colors.white70,
+                            ),
+                          ),
+                        ),
+                      ),
+                      ListTile(
+                        title: TextField(
+                          controller: music,
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                          decoration: InputDecoration(
+                            border: new OutlineInputBorder(
+                              borderSide: new BorderSide(color: Colors.white),
+                              borderRadius: const BorderRadius.all(
+                                const Radius.circular(10.0),
+                              ),
+                            ),
+                            fillColor: Colors.lightBlueAccent,
+                            labelText: 'What is your favorite music',
+                            labelStyle: TextStyle(
+                              color: Colors.white70,
+                            ),
+                          ),
+                        ),
+                      ),
+                      ListTile(
+                        title: TextField(
+                          controller: word,
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                          decoration: InputDecoration(
+                            border: new OutlineInputBorder(
+                              borderSide: new BorderSide(color: Colors.white),
+                              borderRadius: const BorderRadius.all(
+                                const Radius.circular(10.0),
+                              ),
+                            ),
+                            fillColor: Colors.white,
+                            labelText: 'Can you describe yourself with a sentence',
+                            labelStyle: TextStyle(
+                              color: Colors.white70,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                fillColor: Colors.lightBlueAccent,
-                labelText: 'Book',
-                labelStyle: TextStyle(
-                  color: Colors.white70,
+                Divider(
+                  thickness: 1,
+                  color: Colors.white,
                 ),
-              ),
+              ],
             ),
-          ),
-          ListTile(
-            title: Center(child: Text("What is your favorite music")),
-            subtitle: TextField(
-              controller: music,
-              style: TextStyle(
-                color: Colors.white,
-              ),
-              decoration: InputDecoration(
-                border: new OutlineInputBorder(
-                  borderRadius: const BorderRadius.all(
-                    const Radius.circular(10.0),
+            Row(
+              children: [
+                SizedBox(width: MediaQuery.of(context).size.width * 0.6),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushReplacement(context,
+                        MaterialPageRoute(builder: (context) => Pages()));
+                  },
+                  child: Row(
+                    children: [
+                      Text("Approve"),
+                      Icon(Icons.arrow_forward_ios_rounded),
+                    ],
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    shape: new RoundedRectangleBorder(
+                      borderRadius: new BorderRadius.circular(30.0),
+                    ),
+                    primary: Colors.white, // background
+                    onPrimary: Colors.pink[900], // foreground
                   ),
                 ),
-                fillColor: Colors.lightBlueAccent,
-                labelText: 'Music',
-                labelStyle: TextStyle(
-                  color: Colors.white70,
-                ),
-              ),
+              ],
             ),
-          ),
-          ListTile(
-            title: Center(
-                child: Text("Can you describe yourself with a sentence")),
-            subtitle: TextField(
-              controller: word,
-              style: TextStyle(
-                color: Colors.white,
-              ),
-              decoration: InputDecoration(
-                border: new OutlineInputBorder(
-                  borderRadius: const BorderRadius.all(
-                    const Radius.circular(10.0),
-                  ),
-                ),
-                fillColor: Colors.lightBlueAccent,
-                labelText: 'Word',
-                labelStyle: TextStyle(
-                  color: Colors.white70,
-                ),
-              ),
-            ),
-          ),
-        ],
-      )),
+          ],
+        ),
+      ),
     );
   }
 }

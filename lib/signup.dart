@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:union/login.dart';
+import 'dart:math';
 import 'package:http/http.dart' as http;
+
+import 'connect.dart';
 
 class Signup extends StatefulWidget {
   @override
@@ -9,60 +12,110 @@ class Signup extends StatefulWidget {
 
 class _SignupState extends State<Signup> {
   TextEditingController name = new TextEditingController();
+  TextEditingController surname = new TextEditingController();
   TextEditingController mail = new TextEditingController();
   TextEditingController password = new TextEditingController();
-  TextEditingController gender = new TextEditingController();
-  TextEditingController age = new TextEditingController();
+
+  String sql = "";
+  var rng = new Random();
 
   Future addUser() async {
-    var url = Uri.parse("http://kerimsungur.atwebpages.com/adduser.php");
-    var response = await http.post(url, body: {
-      "name": name.text,
-      "mail": mail.text,
-      "password": password.text,
-      "gender": gender.text,
-      "age": age.text,
-    });
+    var db = new Mysql();
+    db.getConnection().then((conn) => {
+          sql =
+              'insert into user (user_id, name, surname, mail, password) values (${rng.nextInt(100000)}, "${name.text}", "${surname.text}", "${mail.text}", "${password.text}")',
+          conn.query(sql).then((results) => {
+                if (results != null)
+                  {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text("Notice"),
+                          content: Text(
+                              "You signed up to U-nion\nNow you can login"),
+                          actions: [
+                            TextButton(
+                              child: Text("Okay"),
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  }
+                else
+                  {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text("Notice"),
+                          content: Text("You could not sign up"),
+                          actions: [
+                            TextButton(
+                              child: Text("Okay"),
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  }
+              })
+        });
+    // var url = Uri.parse("http://kerimsungur.atwebpages.com/adduser.php");
+    // var response = await http.post(url, body: {
+    //   "name": name.text,
+    //   "mail": mail.text,
+    //   "password": password.text,
+    //   "gender": gender.text,
+    //   "age": age.text,
+    // });
 
-    var check = response.body;
+    // var check = response.body;
 
-    if (check == "user added successfully") {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text("Notice"),
-            content: Text("You signed up to U-nion\nNow you can login"),
-            actions: [
-              TextButton(
-                child: Text("Okay"),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          );
-        },
-      );
-    } else {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text("Notice"),
-            content: Text("You could not sign up"),
-            actions: [
-              TextButton(
-                child: Text("Okay"),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          );
-        },
-      );
-    }
+    // if (check == "user added successfully") {
+    //   showDialog(
+    //     context: context,
+    //     builder: (BuildContext context) {
+    //       return AlertDialog(
+    //         title: Text("Notice"),
+    //         content: Text("You signed up to U-nion\nNow you can login"),
+    //         actions: [
+    //           TextButton(
+    //             child: Text("Okay"),
+    //             onPressed: () {
+    //               Navigator.pop(context);
+    //             },
+    //           ),
+    //         ],
+    //       );
+    //     },
+    //   );
+    // } else {
+    //   showDialog(
+    //     context: context,
+    //     builder: (BuildContext context) {
+    //       return AlertDialog(
+    //         title: Text("Notice"),
+    //         content: Text("You could not sign up"),
+    //         actions: [
+    //           TextButton(
+    //             child: Text("Okay"),
+    //             onPressed: () {
+    //               Navigator.pop(context);
+    //             },
+    //           ),
+    //         ],
+    //       );
+    //     },
+    //   );
+    // }
   }
 
   @override
@@ -137,6 +190,26 @@ class _SignupState extends State<Signup> {
                           right: MediaQuery.of(context).size.width * 0.1),
                       width: MediaQuery.of(context).size.width * 0.5,
                       child: TextField(
+                        controller: surname,
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          fillColor: Colors.lightBlueAccent,
+                          labelText: 'Surname',
+                          labelStyle: TextStyle(
+                            color: Colors.white70,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(
+                          left: MediaQuery.of(context).size.width * 0.1,
+                          right: MediaQuery.of(context).size.width * 0.1),
+                      width: MediaQuery.of(context).size.width * 0.5,
+                      child: TextField(
                         controller: mail,
                         style: TextStyle(
                           color: Colors.white,
@@ -144,7 +217,7 @@ class _SignupState extends State<Signup> {
                         decoration: InputDecoration(
                           border: InputBorder.none,
                           fillColor: Colors.lightBlueAccent,
-                          labelText: 'Email',
+                          labelText: 'Mail',
                           labelStyle: TextStyle(
                             color: Colors.white70,
                           ),
@@ -165,47 +238,6 @@ class _SignupState extends State<Signup> {
                           border: InputBorder.none,
                           fillColor: Colors.lightBlueAccent,
                           labelText: 'Password',
-                          labelStyle: TextStyle(
-                            color: Colors.white70,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(
-                          left: MediaQuery.of(context).size.width * 0.1,
-                          right: MediaQuery.of(context).size.width * 0.1),
-                      width: MediaQuery.of(context).size.width * 0.5,
-                      child: TextField(
-                        controller: gender,
-                        style: TextStyle(
-                          color: Colors.white,
-                        ),
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          fillColor: Colors.lightBlueAccent,
-                          labelText: 'Gender',
-                          labelStyle: TextStyle(
-                            color: Colors.white70,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(
-                          bottom: MediaQuery.of(context).size.height * 0.05,
-                          left: MediaQuery.of(context).size.width * 0.1,
-                          right: MediaQuery.of(context).size.width * 0.1),
-                      width: MediaQuery.of(context).size.width * 0.5,
-                      child: TextField(
-                        controller: age,
-                        style: TextStyle(
-                          color: Colors.white,
-                        ),
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          fillColor: Colors.lightBlueAccent,
-                          labelText: 'Age',
                           labelStyle: TextStyle(
                             color: Colors.white70,
                           ),
