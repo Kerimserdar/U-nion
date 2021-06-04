@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-class CreatingForm extends StatefulWidget {
+class Interest extends StatefulWidget {
   @override
-  _CreatingFormState createState() => _CreatingFormState();
+  _InterestState createState() => _InterestState();
 }
 
-class _CreatingFormState extends State<CreatingForm> {
+class _InterestState extends State<Interest> {
   TextEditingController film = new TextEditingController();
   TextEditingController book = new TextEditingController();
   TextEditingController music = new TextEditingController();
@@ -149,7 +149,7 @@ class _CreatingFormState extends State<CreatingForm> {
                 ElevatedButton(
                   onPressed: () {
                     Navigator.pushReplacement(context,
-                        MaterialPageRoute(builder: (context) => CreatingForm()));
+                        MaterialPageRoute(builder: (context) => Interest()));
                   },
                   child: Row(
                     children: [

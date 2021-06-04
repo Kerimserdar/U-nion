@@ -27,7 +27,7 @@ class _UserState extends State<User> {
       body: PageView(
         controller: _controller,
         children: <Widget>[
-          CreatingForm(),
+          Interest(),
           Profile(),
         ],
         onPageChanged: (i) {
