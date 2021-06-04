@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:union/connect.dart';
-import 'package:union/pages.dart';
 import 'package:union/signup.dart';
-import 'package:http/http.dart' as http;
+import 'package:union/user.dart';
 
 int id;
 String name;
@@ -38,7 +37,7 @@ class _LoginState extends State<Login> {
                         mail = row[3],
                       },
                     Navigator.pushReplacement(context,
-                        MaterialPageRoute(builder: (context) => Pages())),
+                        MaterialPageRoute(builder: (context) => User())),
                   }
                 else
                   {

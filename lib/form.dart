@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'login.dart';
 
-class Pages extends StatefulWidget {
+class CreatingForm extends StatefulWidget {
   @override
-  _PagesState createState() => _PagesState();
+  _CreatingFormState createState() => _CreatingFormState();
 }
 
-class _PagesState extends State<Pages> {
+class _CreatingFormState extends State<CreatingForm> {
   TextEditingController film = new TextEditingController();
   TextEditingController book = new TextEditingController();
   TextEditingController music = new TextEditingController();
@@ -150,7 +149,7 @@ class _PagesState extends State<Pages> {
                 ElevatedButton(
                   onPressed: () {
                     Navigator.pushReplacement(context,
-                        MaterialPageRoute(builder: (context) => Pages()));
+                        MaterialPageRoute(builder: (context) => CreatingForm()));
                   },
                   child: Row(
                     children: [

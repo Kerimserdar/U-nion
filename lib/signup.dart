@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:union/login.dart';
 import 'dart:math';
-import 'package:http/http.dart' as http;
 
 import 'connect.dart';
 
