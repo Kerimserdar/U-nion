@@ -2,7 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:union/createform.dart';
 import 'package:union/profile.dart';
 
+import 'connect.dart';
+import 'login.dart';
+import 'room.dart';
+import 'waiting.dart';
+
 class User extends StatefulWidget {
+  static int roomId = 0;
   const User({Key key}) : super(key: key);
 
   @override
@@ -13,6 +19,7 @@ class _UserState extends State<User> {
   PageController _controller = PageController(initialPage: 0);
 
   int _selectedIndex = 0;
+  bool formSent = false;
 
   void _onItemTapped(int index) {
     setState(() {
@@ -21,13 +28,51 @@ class _UserState extends State<User> {
     });
   }
 
+  Future checkRoomAndForm() async {
+    var db = new Mysql();
+    await db.getConnection().then((conn) => {
+          conn
+              .query(
+                  'select * from form, preference where form.preference_id = preference.preference_id and preference.user_id = ${Login.id}')
+              .then((results) => {
+                    if (results.isNotEmpty)
+                      {
+                        setState(() {
+                          formSent = true;
+                        })
+                      }
+                  }),
+        });
+    await db.getConnection().then((conn) => {
+          conn
+              .query('select * from placement where user_id = ${Login.id}')
+              .then((results) => {
+                    for (var row in results)
+                      {
+                        setState(() {
+                          User.roomId = row[1];
+                        }),
+                      }
+                  }),
+        });
+  }
+
+  @override
+  void initState() {
+    checkRoomAndForm();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: PageView(
         controller: _controller,
         children: <Widget>[
-          CreateForm(),
+          User.roomId == 0
+              ? (formSent == true ? Waiting() : CreateForm())
+              : Room(),
           Profile(),
         ],
         onPageChanged: (i) {
