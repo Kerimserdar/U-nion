@@ -32,49 +32,70 @@ class _SignupState extends State<Signup> {
                       },
                     sql =
                         'insert into user (user_id, name, surname, mail, password) values (${last + 1}, "${name.text}", "${surname.text}", "${mail.text}", "${password.text}")',
-                    conn.query(sql).then((results) => {
-                          if (results != null)
-                            {
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: Text("Notice"),
-                                    content: Text(
-                                        "You signed up to U-nion\nNow you can login"),
-                                    actions: [
-                                      TextButton(
-                                        child: Text("Okay"),
-                                        onPressed: () {
-                                          Navigator.pop(context);
-                                        },
-                                      ),
-                                    ],
-                                  );
-                                },
-                              ),
-                            }
-                          else
-                            {
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: Text("Notice"),
-                                    content: Text("You could not sign up"),
-                                    actions: [
-                                      TextButton(
-                                        child: Text("Okay"),
-                                        onPressed: () {
-                                          Navigator.pop(context);
-                                        },
-                                      ),
-                                    ],
-                                  );
-                                },
-                              ),
-                            }
-                        }),
+                    conn
+                        .query(sql)
+                        .onError(
+                          (error, stackTrace) => showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text("Notice"),
+                                content: Text("You could not sign up"),
+                                actions: [
+                                  TextButton(
+                                    child: Text("Okay"),
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                        )
+                        .then((results) => {
+                              if (results != null)
+                                {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: Text("Notice"),
+                                        content: Text(
+                                            "You signed up to U-nion\nNow you can login"),
+                                        actions: [
+                                          TextButton(
+                                            child: Text("Okay"),
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                            },
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                }
+                              else
+                                {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: Text("Notice"),
+                                        content: Text("You could not sign up"),
+                                        actions: [
+                                          TextButton(
+                                            child: Text("Okay"),
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                            },
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                }
+                            }),
                   })
         });
   }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:union/form.dart';
+import 'package:union/createform.dart';
 import 'package:union/profile.dart';
 
 class User extends StatefulWidget {
@@ -27,7 +27,7 @@ class _UserState extends State<User> {
       body: PageView(
         controller: _controller,
         children: <Widget>[
-          Interest(),
+          CreateForm(),
           Profile(),
         ],
         onPageChanged: (i) {

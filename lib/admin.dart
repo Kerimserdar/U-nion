@@ -27,7 +27,7 @@ class _AdminState extends State<Admin> {
       body: PageView(
         controller: _controller,
         children: <Widget>[
-          ApproveForm(),
+          AllForms(),
           Channel(),
         ],
         onPageChanged: (i) {
@@ -40,17 +40,18 @@ class _AdminState extends State<Admin> {
         type: BottomNavigationBarType.fixed,
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.create),
+            icon: Icon(Icons.edit),
             label: "Form",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: "Profile",
+            icon: Icon(Icons.add_to_queue),
+            label: "Channel",
           ),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.pink[700],
         onTap: _onItemTapped,
+        backgroundColor: Colors.white,
       ),
     );
   }
