@@ -4,6 +4,8 @@ import 'package:union/form.dart';
 import 'package:union/signup.dart';
 import 'package:union/user.dart';
 
+import 'admin.dart';
+
 class Login extends StatefulWidget {
   static int id;
   static String name;
@@ -49,10 +51,27 @@ class _LoginState extends State<Login> {
                                 }
                               else
                                 {
-                                  Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => Interest())),
+                                  conn
+                                      .query(
+                                          'select * from admin where user_id = ${Login.id}')
+                                      .then((results) => {
+                                            if (results != null)
+                                              {
+                                                Navigator.pushReplacement(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            Admin())),
+                                              }
+                                            else
+                                              {
+                                                Navigator.pushReplacement(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            Interest())),
+                                              }
+                                          }),
                                 }
                             }),
                   }
