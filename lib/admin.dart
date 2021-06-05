@@ -27,7 +27,7 @@ class _AdminState extends State<Admin> {
       body: PageView(
         controller: _controller,
         children: <Widget>[
-          AllForms(),
+          ApproveForm(),
           Channel(),
         ],
         onPageChanged: (i) {
