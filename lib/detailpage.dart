@@ -369,7 +369,7 @@ class _DetailPageState extends State<DetailPage> {
                                       mainAxisSize: MainAxisSize.min,
                                       children: <Widget>[
                                         new Text(
-                                          'The word that describes him/her: ' +
+                                          'The word that describes him/her: \n' +
                                               values[10],
                                           style: TextStyle(
                                               fontSize: 16.0,
