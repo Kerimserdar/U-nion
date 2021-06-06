@@ -84,8 +84,8 @@ class _UserState extends State<User> {
         type: BottomNavigationBarType.fixed,
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.create),
-            label: "Form",
+            icon: Icon(Icons.chair),
+            label: "Room",
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),

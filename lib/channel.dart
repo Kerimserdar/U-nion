@@ -12,6 +12,7 @@ class Channel extends StatefulWidget {
 class _ChannelState extends State<Channel> {
   TextEditingController discordLink = new TextEditingController();
   TextEditingController zoomLink = new TextEditingController();
+  TextEditingController newRoomName = new TextEditingController();
 
   int discordID = 0;
   int zoomID = 0;
@@ -20,6 +21,7 @@ class _ChannelState extends State<Channel> {
   List roomName = [];
 
   int lastChannel = 0;
+  int lastRoom = 0;
 
   Future getRoom() async {
     var db = new Mysql();
@@ -118,6 +120,59 @@ class _ChannelState extends State<Channel> {
                             .then((result) => {}),
                       }),
             }
+        });
+  }
+
+  Future newRoom() async {
+    var db = new Mysql();
+    await db.getConnection().then((conn) => {
+          conn
+              .query(
+                  'select * from room where room_id = (SELECT MAX(room_id) FROM room)')
+              .then((results) => {
+                    for (var row in results)
+                      {
+                        setState(() {
+                          lastRoom = row[0];
+                        }),
+                      },
+                    conn
+                        .query(
+                            'insert into room (room_id, name, capacity) values (${lastRoom + 1}, "newRoom", 10)')
+                        .then((results) => {}),
+                  }),
+        });
+    await db.getConnection().then((conn) => {
+          conn
+              .query(
+                  'select * from social_channel where channel_id = (SELECT MAX(channel_id) FROM social_channel)')
+              .then((results) => {
+                    for (var row in results)
+                      {
+                        setState(() {
+                          lastChannel = row[0];
+                        }),
+                      },
+                    conn
+                        .query(
+                            'insert into social_channel (channel_id, room_id, name, link) values (${lastChannel + 1}, ${lastRoom + 1}, "discord", "https://discord.gg")')
+                        .then((result) => {
+                              conn
+                                  .query(
+                                      'insert into social_channel (channel_id, room_id, name, link) values (${lastChannel + 2}, ${lastRoom + 1}, "zoom", "https://zoom.us")')
+                                  .then((result) => {}),
+                            }),
+                  }),
+        });
+  }
+
+  Future changeRoomName(int id) async {
+    var db = new Mysql();
+    await db.getConnection().then((conn) => {
+          conn
+              .query(
+                  'update room set name = "${newRoomName.text}" where room_id = $id')
+              .then((results) => {}),
         });
   }
 
@@ -306,6 +361,65 @@ class _ChannelState extends State<Channel> {
                         ),
                       ),
                     ),
+                    actions: <Widget>[
+                      IconSlideAction(
+                        caption: 'Rename',
+                        color: Colors.blue,
+                        icon: Icons.info_outline,
+                        onTap: () {
+                          return showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              contentPadding: EdgeInsets.all(16.0),
+                              content: Row(
+                                children: <Widget>[
+                                  new Expanded(
+                                    child: new TextField(
+                                      controller: newRoomName,
+                                      autofocus: true,
+                                      decoration: new InputDecoration(
+                                        labelText: 'New Room Name',
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              ),
+                              actions: <Widget>[
+                                new ElevatedButton(
+                                    style: ButtonStyle(
+                                      backgroundColor:
+                                          MaterialStateProperty.all(
+                                              Colors.white),
+                                      shape: MaterialStateProperty.all<
+                                          RoundedRectangleBorder>(
+                                        RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(18.0),
+                                          side: BorderSide(color: Colors.red),
+                                        ),
+                                      ),
+                                    ),
+                                    child: const Text(
+                                      'Cancel',
+                                      style: TextStyle(
+                                        color: Colors.red,
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    }),
+                                new ElevatedButton(
+                                    child: const Text('Okay'),
+                                    onPressed: () async {
+                                      changeRoomName(roomID[i]);
+                                      Navigator.pop(context);
+                                    })
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ],
                     secondaryActions: <Widget>[
                       IconSlideAction(
                         caption: 'Delete',
@@ -324,7 +438,21 @@ class _ChannelState extends State<Channel> {
                 child: Text(
               "Click on the room to add, delete or edit the link",
               style: TextStyle(color: Colors.white, fontSize: 15),
-            ))
+            )),
+            Container(
+                margin: EdgeInsets.all(15),
+                child: TextButton(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.add),
+                      Text("Add new Room"),
+                    ],
+                  ),
+                  onPressed: () {
+                    newRoom();
+                  },
+                )),
           ],
         ),
       ),
