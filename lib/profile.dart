@@ -115,7 +115,11 @@ class _ProfileState extends State<Profile> {
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: <Widget>[
                         SizedBox(),
-                        _status ? getEditIcon() : new Container(),
+                        _status
+                            ?
+                            //getEditIcon()
+                            new Container()
+                            : new Container(),
                       ],
                     )
                   ],

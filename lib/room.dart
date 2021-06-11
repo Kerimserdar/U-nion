@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'connect.dart';
 import 'login.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 class Room extends StatefulWidget {
   const Room({Key key}) : super(key: key);
@@ -11,12 +12,17 @@ class Room extends StatefulWidget {
 }
 
 class _RoomState extends State<Room> {
+  TextEditingController comment = new TextEditingController();
+
   int roomID = 0;
   String roomName = "";
   String discordLink = "";
   String zoomLink = "";
   List userIDs = [];
   List userNames = [];
+  bool commentExist = true;
+  int rating = 0;
+  int lastComment = 0;
 
   Future getRoomDetail() async {
     var db = new Mysql();
@@ -94,8 +100,127 @@ class _RoomState extends State<Room> {
         });
   }
 
+  Future checkComment() async {
+    var db = new Mysql();
+    await db.getConnection().then((conn) => {
+          conn
+              .query('select * from comment where user_id = ${Login.id}')
+              .then((results) => {
+                    if (results.isNotEmpty)
+                      {
+                        setState(() {
+                          commentExist = true;
+                        }),
+                      }
+                    else
+                      {
+                        setState(() {
+                          commentExist = false;
+                        }),
+                      }
+                  }),
+        });
+  }
+
+  Future sendComment() async {
+    var db = new Mysql();
+    await db.getConnection().then((conn) => {
+          conn
+              .query(
+                  'select * from comment where comment_id = (SELECT MAX(comment_id) FROM comment)')
+              .then((results) => {
+                    for (var row in results)
+                      {
+                        setState(() {
+                          lastComment = row[0];
+                        })
+                      },
+                    conn
+                        .query(
+                            'insert into comment (comment_id, user_id, comment, rating) values (${lastComment + 1}, ${Login.id}, "${comment.text}", $rating)')
+                        .then((results) => {}),
+                  }),
+        });
+  }
+
+  showAlertDialog(BuildContext context) {
+    Widget cancelButton = ElevatedButton(
+      child: Text("Cancel"),
+      onPressed: () {
+        Navigator.pop(context);
+      },
+    );
+    Widget continueButton = ElevatedButton(
+      child: Text("Send"),
+      onPressed: () async {
+        await sendComment();
+        Navigator.pop(context);
+      },
+    );
+    AlertDialog alert = AlertDialog(
+      title: Center(
+        child: Text('Give a comment to U-nion'),
+      ),
+      content: Container(
+        height: 110,
+        child: Column(
+          children: [
+            RatingBar.builder(
+              minRating: 1,
+              direction: Axis.horizontal,
+              allowHalfRating: false,
+              itemCount: 5,
+              itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
+              itemBuilder: (context, _) => Icon(
+                Icons.star,
+                color: Colors.amber,
+              ),
+              onRatingUpdate: (r) {
+                setState(() {
+                  rating = r.toInt();
+                });
+              },
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            TextField(
+              controller: comment,
+              style: TextStyle(
+                color: Colors.black,
+              ),
+              decoration: InputDecoration(
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.blue, width: 2.0),
+                ),
+                border: new OutlineInputBorder(
+                  borderSide: new BorderSide(color: Colors.white),
+                  borderRadius: const BorderRadius.all(
+                    const Radius.circular(10.0),
+                  ),
+                ),
+                fillColor: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        cancelButton,
+        continueButton,
+      ],
+    );
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
   @override
   void initState() {
+    checkComment();
     getRoomDetail();
     super.initState();
   }
@@ -103,6 +228,7 @@ class _RoomState extends State<Room> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
           Container(
@@ -128,6 +254,22 @@ class _RoomState extends State<Room> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
+                  commentExist == false
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            SizedBox(
+                              width: 150,
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.info),
+                              onPressed: () {
+                                showAlertDialog(context);
+                              },
+                            )
+                          ],
+                        )
+                      : SizedBox(),
                   Text(
                     roomName,
                     style: TextStyle(fontSize: 40, color: Colors.blue[900]),

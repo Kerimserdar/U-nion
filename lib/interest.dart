@@ -22,6 +22,7 @@ class _InterestState extends State<Interest> {
 
   var lastInterest = 0;
   var lastLocation = 0;
+  var last = 0;
 
   Future addValues() async {
     var db = new Mysql();
@@ -62,8 +63,19 @@ class _InterestState extends State<Interest> {
     await db.getConnection().then((conn) => {
           conn
               .query(
-                  'insert into person (user_id, location_id, interest_id, gender, age, job, education) values (${Login.id}, ${lastLocation + 1}, ${lastInterest + 1}, "${gender.text}", ${age.text}, "${job.text}", "${education.text}")')
-              .then((r) => {}),
+                  'select * from person where location_id = (SELECT MAX(location_id) FROM location)')
+              .then((results) => {
+                    for (var row in results)
+                      {
+                        setState(() {
+                          last = row[1];
+                        }),
+                      },
+                    conn
+                        .query(
+                            'insert into person (user_id, location_id, interest_id, gender, age, job, education) values (${Login.id}, ${last + 1}, ${last + 1}, "${gender.text}", ${age.text}, "${job.text}", "${education.text}")')
+                        .then((r) => {}),
+                  }),
         });
   }
 
