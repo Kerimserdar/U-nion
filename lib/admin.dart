@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:union/activity.dart';
 import 'package:union/approveform.dart';
 import 'package:union/channel.dart';
 
 class Admin extends StatefulWidget {
-  const Admin({ Key key }) : super(key: key);
+  const Admin({Key key}) : super(key: key);
 
   @override
   _AdminState createState() => _AdminState();
@@ -24,11 +25,13 @@ class _AdminState extends State<Admin> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: PageView(
         controller: _controller,
         children: <Widget>[
           ApproveForm(),
           Channel(),
+          Activity(),
         ],
         onPageChanged: (i) {
           setState(() {
@@ -45,7 +48,11 @@ class _AdminState extends State<Admin> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.add_to_queue),
-            label: "Channel",
+            label: "Room &\n Channel",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.comment),
+            label: "Activity &\n Comment",
           ),
         ],
         currentIndex: _selectedIndex,

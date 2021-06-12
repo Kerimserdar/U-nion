@@ -23,6 +23,8 @@ class _ChannelState extends State<Channel> {
   int lastChannel = 0;
   int lastRoom = 0;
 
+  List userIDs = [];
+
   Future getRoom() async {
     var db = new Mysql();
     await db.getConnection().then((conn) => {
@@ -176,6 +178,48 @@ class _ChannelState extends State<Channel> {
         });
   }
 
+  Future deleteRoom(int id) async {
+    var db = new Mysql();
+    await db.getConnection().then((conn) => {
+          // conn
+          //         .query(
+          //             'select * from placement where room_id = $id')
+          //         .then((results) => {
+          //           for (var row in results)
+          //                 {
+          //                   setState(() {
+          //                     userIDs.add(row[0]);
+          //                   }),
+          //                 },
+          //         }),
+          //         conn
+          //         .query('select * from preference natural join form natural join receives where preference.user_id = 1')
+          //         .then((results) => {
+          //           for (var row in results)
+          //                 {
+          //                   setState(() {
+          //                     userIDs.add(row[0]);
+          //                   }),
+          //                 },
+          //         }),
+
+          conn
+              .query('delete from social_channel where room_id = $id')
+              .then((results) => {
+                    conn
+                        .query('delete from placement where room_id = $id')
+                        .then((results) => {
+                              conn
+                                  .query('delete from room where room_id = $id')
+                                  .then((results) => {
+                                        conn.query(
+                                            'delete from placement where room_id = $id')
+                                      })
+                            }),
+                  }),
+        });
+  }
+
   @override
   void initState() {
     getRoom();
@@ -185,6 +229,7 @@ class _ChannelState extends State<Channel> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Container(
         color: Colors.amber,
         child: Column(
@@ -426,7 +471,7 @@ class _ChannelState extends State<Channel> {
                         color: Colors.red,
                         icon: Icons.delete,
                         onTap: () {
-                          //deleteForm(formIDs[i]);
+                          deleteRoom(roomID[i]);
                         },
                       ),
                     ],
