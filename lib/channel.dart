@@ -204,19 +204,9 @@ class _ChannelState extends State<Channel> {
           //         }),
 
           conn
-              .query('delete from social_channel where room_id = $id')
-              .then((results) => {
-                    conn
-                        .query('delete from placement where room_id = $id')
-                        .then((results) => {
-                              conn
-                                  .query('delete from room where room_id = $id')
-                                  .then((results) => {
-                                        conn.query(
-                                            'delete from placement where room_id = $id')
-                                      })
-                            }),
-                  }),
+              .query(
+                  'delete from social_channel where room_id = $id; delete from placement where room_id = $id; delete from room where room_id = $id')
+              .then((results) => {}),
         });
   }
 
