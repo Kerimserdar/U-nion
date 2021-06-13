@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:union/login.dart';
-import 'dart:math';
-import 'package:http/http.dart' as http;
 
 import 'connect.dart';
 
@@ -17,105 +15,89 @@ class _SignupState extends State<Signup> {
   TextEditingController password = new TextEditingController();
 
   String sql = "";
-  var rng = new Random();
+  var last = 0;
 
   Future addUser() async {
     var db = new Mysql();
     db.getConnection().then((conn) => {
-          sql =
-              'insert into user (user_id, name, surname, mail, password) values (${rng.nextInt(100000)}, "${name.text}", "${surname.text}", "${mail.text}", "${password.text}")',
-          conn.query(sql).then((results) => {
-                if (results != null)
-                  {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: Text("Notice"),
-                          content: Text(
-                              "You signed up to U-nion\nNow you can login"),
-                          actions: [
-                            TextButton(
-                              child: Text("Okay"),
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                            ),
-                          ],
-                        );
+          conn
+              .query(
+                  'select * from user where user_id = (SELECT MAX(user_id) FROM user)')
+              .then((v) => {
+                    for (var row in v)
+                      {
+                        setState(() {
+                          last = row[0];
+                        }),
                       },
-                    ),
-                  }
-                else
-                  {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: Text("Notice"),
-                          content: Text("You could not sign up"),
-                          actions: [
-                            TextButton(
-                              child: Text("Okay"),
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                  }
-              })
+                    sql =
+                        'insert into user (user_id, name, surname, mail, password) values (${last + 1}, "${name.text}", "${surname.text}", "${mail.text}", "${password.text}")',
+                    conn
+                        .query(sql)
+                        .onError(
+                          (error, stackTrace) => showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text("Notice"),
+                                content: Text("You could not sign up"),
+                                actions: [
+                                  TextButton(
+                                    child: Text("Okay"),
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                        )
+                        .then((results) => {
+                              if (results != null)
+                                {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: Text("Notice"),
+                                        content: Text(
+                                            "You signed up to U-nion\nNow you can login"),
+                                        actions: [
+                                          TextButton(
+                                            child: Text("Okay"),
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                            },
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                }
+                              else
+                                {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: Text("Notice"),
+                                        content: Text("You could not sign up"),
+                                        actions: [
+                                          TextButton(
+                                            child: Text("Okay"),
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                            },
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                }
+                            }),
+                  })
         });
-    // var url = Uri.parse("http://kerimsungur.atwebpages.com/adduser.php");
-    // var response = await http.post(url, body: {
-    //   "name": name.text,
-    //   "mail": mail.text,
-    //   "password": password.text,
-    //   "gender": gender.text,
-    //   "age": age.text,
-    // });
-
-    // var check = response.body;
-
-    // if (check == "user added successfully") {
-    //   showDialog(
-    //     context: context,
-    //     builder: (BuildContext context) {
-    //       return AlertDialog(
-    //         title: Text("Notice"),
-    //         content: Text("You signed up to U-nion\nNow you can login"),
-    //         actions: [
-    //           TextButton(
-    //             child: Text("Okay"),
-    //             onPressed: () {
-    //               Navigator.pop(context);
-    //             },
-    //           ),
-    //         ],
-    //       );
-    //     },
-    //   );
-    // } else {
-    //   showDialog(
-    //     context: context,
-    //     builder: (BuildContext context) {
-    //       return AlertDialog(
-    //         title: Text("Notice"),
-    //         content: Text("You could not sign up"),
-    //         actions: [
-    //           TextButton(
-    //             child: Text("Okay"),
-    //             onPressed: () {
-    //               Navigator.pop(context);
-    //             },
-    //           ),
-    //         ],
-    //       );
-    //     },
-    //   );
-    // }
   }
 
   @override

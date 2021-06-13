@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:union/connect.dart';
-import 'package:union/pages.dart';
+import 'package:union/interest.dart';
 import 'package:union/signup.dart';
-import 'package:http/http.dart' as http;
+import 'package:union/user.dart';
 
-int id;
-String name;
-String surname;
-String mail;
+import 'admin.dart';
 
 class Login extends StatefulWidget {
+  static int id = 0;
+  static String name = "";
+  static String surname = "";
+  static String mail = "";
   Login({Key key}) : super(key: key);
 
   @override
@@ -20,78 +21,84 @@ class _LoginState extends State<Login> {
   TextEditingController m = TextEditingController();
   TextEditingController p = TextEditingController();
 
-  String sql = "";
-
   Future checkUser() async {
     var db = new Mysql();
-    db.getConnection().then((conn) => {
-          sql =
-              'select * from user where mail = "${m.text}" and password = "${p.text}"',
-          conn.query(sql).then((results) => {
-                if (results != null)
-                  {
-                    for (var row in results)
+    await db.getConnection().then((conn) => {
+          conn
+              .query(
+                  'select * from user where mail = "${m.text}" and password = "${p.text}"')
+              .then((r) => {
+                    if (r.isNotEmpty)
                       {
-                        id = row[0],
-                        name = row[1],
-                        surname = row[2],
-                        mail = row[3],
-                      },
-                    Navigator.pushReplacement(context,
-                        MaterialPageRoute(builder: (context) => Pages())),
-                  }
-                else
-                  {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: Text("Warning"),
-                          content: Text("Mail or password is wrong"),
-                          actions: [
-                            TextButton(
-                              child: Text("Okay"),
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                  }
-              })
+                        for (var row in r)
+                          {
+                            setState(() {
+                              Login.id = row[0];
+                              Login.name = row[1];
+                              Login.surname = row[2];
+                              Login.mail = row[3];
+                            }),
+                          },
+                        conn
+                            .query(
+                                'select * from person where user_id = ${Login.id}')
+                            .then((results) => {
+                                  if (results.isNotEmpty)
+                                    {
+                                      Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) => User())),
+                                    }
+                                  else
+                                    {
+                                      conn
+                                          .query(
+                                              'select * from admin where user_id = ${Login.id}')
+                                          .then((results2) => {
+                                                if (results2.isNotEmpty)
+                                                  {
+                                                    Navigator.pushReplacement(
+                                                        context,
+                                                        MaterialPageRoute(
+                                                            builder:
+                                                                (context) =>
+                                                                    Admin())),
+                                                  }
+                                                else
+                                                  {
+                                                    Navigator.pushReplacement(
+                                                        context,
+                                                        MaterialPageRoute(
+                                                            builder: (context) =>
+                                                                Interest())),
+                                                  }
+                                              }),
+                                    }
+                                }),
+                      }
+                    else
+                      {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text("Warning"),
+                              content: Text("Mail or password is wrong"),
+                              actions: [
+                                TextButton(
+                                  child: Text("Okay"),
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      }
+                  })
         });
-
-    // var url =
-    //     Uri.parse("http://kerimsungur.atwebpages.com/checkuser.php");
-    // var response = await http.post(url, body: {
-    //   "mail": mail.text,
-    //   "password": password.text,
-    // });
-
-    // if (response.body == "true") {
-    //     Navigator.pushReplacement(
-    //         context, MaterialPageRoute(builder: (context) => Pages()));
-    //   } else {
-    //     showDialog(
-    //       context: context,
-    //       builder: (BuildContext context) {
-    //         return AlertDialog(
-    //           title: Text("Warning"),
-    //           content: Text("Mail or password is wrong"),
-    //           actions: [
-    //             TextButton(
-    //               child: Text("Okay"),
-    //               onPressed: () {
-    //                 Navigator.pop(context);
-    //               },
-    //             ),
-    //           ],
-    //         );
-    //       },
-    //     );
-    //   }
   }
 
   @override
