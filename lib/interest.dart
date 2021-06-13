@@ -63,7 +63,7 @@ class _InterestState extends State<Interest> {
     await db.getConnection().then((conn) => {
           conn
               .query(
-                  'select * from person where location_id = (SELECT MAX(location_id) FROM location)')
+                  'select * from person where location_id = (SELECT MAX(location_id) FROM person)')
               .then((results) => {
                     for (var row in results)
                       {

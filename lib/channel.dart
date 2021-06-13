@@ -181,32 +181,52 @@ class _ChannelState extends State<Channel> {
   Future deleteRoom(int id) async {
     var db = new Mysql();
     await db.getConnection().then((conn) => {
-          // conn
-          //         .query(
-          //             'select * from placement where room_id = $id')
-          //         .then((results) => {
-          //           for (var row in results)
-          //                 {
-          //                   setState(() {
-          //                     userIDs.add(row[0]);
-          //                   }),
-          //                 },
-          //         }),
-          //         conn
-          //         .query('select * from preference natural join form natural join receives where preference.user_id = 1')
-          //         .then((results) => {
-          //           for (var row in results)
-          //                 {
-          //                   setState(() {
-          //                     userIDs.add(row[0]);
-          //                   }),
-          //                 },
-          //         }),
-
           conn
-              .query(
-                  'delete from social_channel where room_id = $id; delete from placement where room_id = $id; delete from room where room_id = $id')
-              .then((results) => {}),
+              .query('select * from placement where room_id = $id')
+              .then((results) => {
+                    for (var row in results)
+                      {
+                        setState(() {
+                          userIDs.add(row[0]);
+                        }),
+                        conn
+                            .query(
+                                'select * from preference natural join form natural join receives where preference.user_id = ${row[0]}')
+                            .then((results1) => {
+                                  for (var row1 in results1)
+                                    {
+                                      conn
+                                          .query(
+                                              'delete from receives where form_id = ${row1[0]}')
+                                          .then((results) => {
+                                                conn
+                                                    .query(
+                                                        'delete from form where form_id = ${row1[0]}')
+                                                    .then((results) => {
+                                                          conn
+                                                              .query(
+                                                                  'delete from preference where user_id = ${row1[2]}')
+                                                              .then((results) =>
+                                                                  {}),
+                                                        }),
+                                              }),
+                                    },
+                                }),
+                      },
+                  }),
+        });
+    await db.getConnection().then((conn) => {
+          conn
+              .query('delete from social_channel where room_id = $id')
+              .then((results) => {
+                    conn
+                        .query('delete from placement where room_id = $id')
+                        .then((results) => {
+                              conn
+                                  .query('delete from room where room_id = $id')
+                                  .then((results) => {}),
+                            }),
+                  }),
         });
   }
 

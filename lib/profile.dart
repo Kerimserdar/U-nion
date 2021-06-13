@@ -44,35 +44,33 @@ class _ProfileState extends State<Profile> {
                           job = row[5];
                           education = row[6];
                         }),
-                      }
-                  }),
-        });
-    await db.getConnection().then((conn) => {
-          conn
-              .query("select * from location where location_id = $locationId")
-              .then((results) => {
-                    for (var row in results)
-                      {
-                        setState(() {
-                          country = row[1];
-                          city = row[2];
-                        }),
-                      }
-                  }),
-        });
-    await db.getConnection().then((conn) => {
-          conn
-              .query("select * from interest where interest_id = $interestId")
-              .then((results) => {
-                    for (var row in results)
-                      {
-                        setState(() {
-                          film = row[1];
-                          book = row[2];
-                          music = row[3];
-                          word = row[4];
-                        }),
-                      }
+                      },
+                    conn
+                        .query(
+                            "select * from location where location_id = $locationId")
+                        .then((results1) => {
+                              for (var row in results1)
+                                {
+                                  setState(() {
+                                    country = row[1];
+                                    city = row[2];
+                                  }),
+                                },
+                              conn
+                                  .query(
+                                      "select * from interest where interest_id = $interestId")
+                                  .then((results2) => {
+                                        for (var row in results2)
+                                          {
+                                            setState(() {
+                                              film = row[1];
+                                              book = row[2];
+                                              music = row[3];
+                                              word = row[4];
+                                            }),
+                                          }
+                                      }),
+                            }),
                   }),
         });
   }
