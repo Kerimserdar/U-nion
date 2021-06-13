@@ -135,7 +135,7 @@ class _SignupState extends State<Signup> {
                   child: RotatedBox(
                       quarterTurns: -1,
                       child: Text(
-                        'Sing up',
+                        'Sign up',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 40,

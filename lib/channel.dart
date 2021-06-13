@@ -14,6 +14,9 @@ class _ChannelState extends State<Channel> {
   TextEditingController zoomLink = new TextEditingController();
   TextEditingController newRoomName = new TextEditingController();
 
+  int selectedDiscordChannelID = 0;
+  int selectedZoomChannelID = 0;
+
   int discordID = 0;
   int zoomID = 0;
 
@@ -24,6 +27,8 @@ class _ChannelState extends State<Channel> {
   int lastRoom = 0;
 
   List userIDs = [];
+  List<Map<String, dynamic>> allChannelsDiscord = [];
+  List<Map<String, dynamic>> allChannelsZoom = [];
 
   Future getRoom() async {
     var db = new Mysql();
@@ -40,31 +45,61 @@ class _ChannelState extends State<Channel> {
         });
   }
 
-  Future getChannel(int id) async {
+  Future getChannel({int roomID = 0}) async {
     var db = new Mysql();
-    await db.getConnection().then((conn) => {
-          conn
-              .query('select * from social_channel where room_id = $id')
-              .then((result) => {
+    roomID == 0
+        ? await db.getConnection().then((conn) => {
+              conn.query('select * from social_channel').then((result) => {
                     for (var row in result)
                       {
                         if (row[2] == "discord")
                           {
                             setState(() {
-                              discordID = row[0];
-                              discordLink.text = row[3];
+                              allChannelsDiscord.add({
+                                "channel_id": row[0],
+                                "room_id": row[1],
+                                "name": row[2],
+                                "link": row[3]
+                              });
                             }),
                           }
                         else if (row[2] == "zoom")
                           {
                             setState(() {
-                              zoomID = row[0];
-                              zoomLink.text = row[3];
+                              allChannelsZoom.add({
+                                "channel_id": row[0],
+                                "room_id": row[1],
+                                "name": row[2],
+                                "link": row[3]
+                              });
                             }),
                           }
                       }
                   }),
-        });
+            })
+        : await db.getConnection().then((conn) => {
+              conn
+                  .query('select * from social_channel where room_id = $roomID')
+                  .then((result) => {
+                        for (var row in result)
+                          {
+                            if (row[2] == "discord")
+                              {
+                                setState(() {
+                                  discordID = row[0];
+                                  discordLink.text = row[3];
+                                }),
+                              }
+                            else if (row[2] == "zoom")
+                              {
+                                setState(() {
+                                  zoomID = row[0];
+                                  zoomLink.text = row[3];
+                                }),
+                              }
+                          }
+                      }),
+            });
   }
 
   Future changeChannel(int id) async {
@@ -125,7 +160,7 @@ class _ChannelState extends State<Channel> {
         });
   }
 
-  Future newRoom() async {
+  Future newRoom({int localDiscordID = 0, int localZoomID = 0}) async {
     var db = new Mysql();
     await db.getConnection().then((conn) => {
           conn
@@ -145,26 +180,36 @@ class _ChannelState extends State<Channel> {
                   }),
         });
     await db.getConnection().then((conn) => {
-          conn
-              .query(
-                  'select * from social_channel where channel_id = (SELECT MAX(channel_id) FROM social_channel)')
-              .then((results) => {
-                    for (var row in results)
-                      {
-                        setState(() {
-                          lastChannel = row[0];
-                        }),
-                      },
-                    conn
-                        .query(
-                            'insert into social_channel (channel_id, room_id, name, link) values (${lastChannel + 1}, ${lastRoom + 1}, "discord", "https://discord.gg")')
-                        .then((result) => {
-                              conn
-                                  .query(
-                                      'insert into social_channel (channel_id, room_id, name, link) values (${lastChannel + 2}, ${lastRoom + 1}, "zoom", "https://zoom.us")')
-                                  .then((result) => {}),
+          (localDiscordID != 0 && localZoomID != 0)
+              ? conn
+                  .query(
+                      'insert into social_channel (channel_id, room_id, name, link) values (${allChannelsDiscord[localDiscordID - 1]["channel_id"]}, ${lastRoom + 1}, "discord", "${allChannelsDiscord[localDiscordID - 1]["link"]}")')
+                  .then((result) => {
+                        conn
+                            .query(
+                                'insert into social_channel (channel_id, room_id, name, link) values (${allChannelsZoom[localZoomID - 1]["channel_id"]}, ${lastRoom + 1}, "zoom", "${allChannelsZoom[localZoomID - 1]["link"]}")')
+                            .then((result) => {}),
+                      })
+              : conn
+                  .query(
+                      'select * from social_channel where channel_id = (SELECT MAX(channel_id) FROM social_channel)')
+                  .then((results) => {
+                        for (var row in results)
+                          {
+                            setState(() {
+                              lastChannel = row[0];
                             }),
-                  }),
+                          },
+                        conn
+                            .query(
+                                'insert into social_channel (channel_id, room_id, name, link) values (${lastChannel + 1}, ${lastRoom + 1}, "discord", "https://discord.gg")')
+                            .then((result) => {
+                                  conn
+                                      .query(
+                                          'insert into social_channel (channel_id, room_id, name, link) values (${lastChannel + 2}, ${lastRoom + 1}, "zoom", "https://zoom.us")')
+                                      .then((result) => {}),
+                                }),
+                      }),
         });
   }
 
@@ -263,7 +308,7 @@ class _ChannelState extends State<Channel> {
                           borderRadius: BorderRadius.all(Radius.circular(30))),
                       child: TextButton(
                         onPressed: () async {
-                          await getChannel(roomID[i]);
+                          await getChannel(roomID: roomID[i]);
                           showModalBottomSheet(
                               isScrollControlled: true,
                               backgroundColor: Colors.transparent,
@@ -504,8 +549,139 @@ class _ChannelState extends State<Channel> {
                       Text("Add new Room"),
                     ],
                   ),
-                  onPressed: () {
-                    newRoom();
+                  onPressed: () async {
+                    allChannelsDiscord.clear();
+                    allChannelsZoom.clear();
+                    await getChannel();
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        contentPadding: EdgeInsets.all(16.0),
+                        content: Container(
+                          height: 210,
+                          child: Column(
+                            children: <Widget>[
+                              Column(
+                                children: [
+                                  TextButton(
+                                      onPressed: () async {
+                                        await newRoom();
+                                        Navigator.pop(context);
+                                      },
+                                      child: Text(
+                                        "Clict to Add new channels to new room",
+                                        style: TextStyle(fontSize: 16),
+                                      )),
+                                  Divider(
+                                    color: Colors.amber,
+                                    thickness: 3,
+                                  ),
+                                  SizedBox(
+                                    height: 15,
+                                  ),
+                                  Text("Assign existing channels by clicking"),
+                                  PopupMenuButton<int>(
+                                      onSelected: (int value) {
+                                        setState(() {
+                                          selectedDiscordChannelID =
+                                              (value + 1);
+                                        });
+                                        print(value + 1);
+                                      },
+                                      child: ListTile(
+                                        title: Column(
+                                          children: <Widget>[
+                                            Text(
+                                              'Discord',
+                                              style: TextStyle(
+                                                color: Colors.blue,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      itemBuilder: (BuildContext context) {
+                                        return List.generate(
+                                            allChannelsDiscord.length, (index) {
+                                          return PopupMenuItem(
+                                            child: PopupMenuItem<int>(
+                                              value: index,
+                                              child: Text(
+                                                  allChannelsDiscord[index]
+                                                      ["link"]),
+                                            ),
+                                          );
+                                        });
+                                      }),
+                                  PopupMenuButton<int>(
+                                      onSelected: (int value) {
+                                        setState(() {
+                                          selectedZoomChannelID = (value + 1);
+                                        });
+                                        print(value + 1);
+                                      },
+                                      child: ListTile(
+                                        title: Column(
+                                          children: <Widget>[
+                                            Text(
+                                              'Zoom',
+                                              style: TextStyle(
+                                                color: Colors.blue,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      itemBuilder: (BuildContext context) {
+                                        return List.generate(
+                                            allChannelsZoom.length, (index) {
+                                          return PopupMenuItem(
+                                            child: PopupMenuItem<int>(
+                                              value: index,
+                                              child: Text(allChannelsZoom[index]
+                                                  ["link"]),
+                                            ),
+                                          );
+                                        });
+                                      }),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        actions: <Widget>[
+                          ElevatedButton(
+                              style: ButtonStyle(
+                                backgroundColor:
+                                    MaterialStateProperty.all(Colors.white),
+                                shape: MaterialStateProperty.all<
+                                    RoundedRectangleBorder>(
+                                  RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(18.0),
+                                    side: BorderSide(color: Colors.red),
+                                  ),
+                                ),
+                              ),
+                              child: Text(
+                                'Cancel',
+                                style: TextStyle(
+                                  color: Colors.red,
+                                ),
+                              ),
+                              onPressed: () {
+                                Navigator.pop(context);
+                              }),
+                          ElevatedButton(
+                              child: const Text('Okay'),
+                              onPressed: () async {
+                                await newRoom(
+                                    localDiscordID: selectedDiscordChannelID,
+                                    localZoomID: selectedZoomChannelID);
+                                Navigator.pop(context);
+                              }),
+                        ],
+                      ),
+                    );
                   },
                 )),
           ],

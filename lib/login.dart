@@ -161,7 +161,7 @@ class _LoginState extends State<Login> {
                   child: RotatedBox(
                       quarterTurns: -1,
                       child: Text(
-                        'Sing in',
+                        'Sign in',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 40,
@@ -260,7 +260,7 @@ class _LoginState extends State<Login> {
                             MaterialPageRoute(builder: (context) => Signup()));
                       },
                       child: Text(
-                        'Sing up',
+                        'Sign up',
                         style: TextStyle(
                           color: Colors.white,
                         ),
